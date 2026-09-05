@@ -45,7 +45,7 @@ export const processReportInternal = async (reportId, userId) => {
     if (aiErr.code === 'AI_PROCESSING_UNAVAILABLE' || aiErr.message?.includes('AI extraction is temporarily unavailable')) {
       report.processingStatus = 'AI_PROCESSING_UNAVAILABLE';
       report.isDemoFallback = false;
-      report.demoFallbackReason = null;
+      report.demoFallbackReason = aiErr.safeReason || aiErr.message || null;
       await report.save();
 
       // Clear any prior lab results for this report
@@ -58,7 +58,7 @@ export const processReportInternal = async (reportId, userId) => {
         action: 'AI_PROCESSING_UNAVAILABLE',
         fieldChanged: 'processingStatus',
         newValue: 'AI_PROCESSING_UNAVAILABLE',
-        comment: 'AI extraction temporarily unavailable. Clinician may review report manually.',
+        comment: aiErr.safeReason || 'AI extraction temporarily unavailable. Clinician may review report manually.',
       });
 
       return {
@@ -70,10 +70,10 @@ export const processReportInternal = async (reportId, userId) => {
           keyObservations: [],
           abnormalFindings: [],
           missingInformation: [],
-          disclaimer: 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
+          disclaimer: aiErr.safeReason || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
         },
         error: 'AI_PROCESSING_UNAVAILABLE',
-        message: 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
+        message: aiErr.safeReason || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
       };
     }
     throw aiErr;
@@ -670,7 +670,7 @@ export const extractIntakePreview = async (req, res) => {
         return res.status(200).json({
           success: false,
           code: 'AI_PROCESSING_UNAVAILABLE',
-          message: 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
+          message: aiErr.safeReason || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
         });
       }
       throw aiErr;
@@ -680,7 +680,7 @@ export const extractIntakePreview = async (req, res) => {
     return res.status(200).json({
       success: false,
       code: 'AI_PROCESSING_UNAVAILABLE',
-      message: 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
+      message: error.safeReason || error.message || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
     });
   } finally {
     if (req.file?.path && fs.existsSync(req.file.path)) {

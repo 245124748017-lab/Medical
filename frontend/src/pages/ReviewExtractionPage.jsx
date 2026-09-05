@@ -310,7 +310,7 @@ export default function ReviewExtractionPage() {
             <div className="space-y-1">
               <h3 className="font-bold text-sm text-sky-950">AI Extraction Status</h3>
               <p className="text-xs text-sky-800 leading-relaxed">
-                AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.
+                {report?.demoFallbackReason || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.'}
               </p>
             </div>
           </div>

@@ -147,7 +147,7 @@ export default function ReportUploadPage() {
         setProcessingStatus('READY_FOR_REVIEW');
         setCompletedReportId(res.data.report._id);
         if (res.data.report?.processingStatus === 'AI_PROCESSING_UNAVAILABLE') {
-          addToast('Report uploaded. AI extraction is temporarily unavailable — please review manually.', 'info');
+          addToast(res.data.message || 'Report uploaded. AI extraction is temporarily unavailable — please review manually.', 'info');
         } else {
           addToast('Medical report successfully analyzed and ready for verification!', 'success');
         }

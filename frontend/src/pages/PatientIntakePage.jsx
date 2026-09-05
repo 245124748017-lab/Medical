@@ -78,7 +78,7 @@ export default function PatientIntakePage() {
 
       if (!res.data.success || res.data.code === 'AI_PROCESSING_UNAVAILABLE') {
         addToast(
-          'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
+          res.data.message || 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
           'info'
         );
         return;

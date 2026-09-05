@@ -25,7 +25,7 @@ const sanitizeError = (rawMessage) => {
   clean = clean.replace(/AQ\.[0-9A-Za-z-_]{30,}/g, '[REDACTED_API_KEY]');
 
   if (clean.includes('403') || clean.includes('denied access') || clean.includes('Forbidden')) {
-    return 'Gemini API returned [403 Forbidden]: Your Google Cloud project has been denied access or requires permissions/billing setup in Google AI Studio. Please verify project access.';
+    return 'Gemini API returned [403 Forbidden: Project Denied Access]. Your Google Cloud project has been restricted. Please create an API key in a brand new project in Google AI Studio (aistudio.google.com) and update GEMINI_API_KEY in Render.';
   }
   if (clean.includes('429') || clean.includes('quota') || clean.includes('Resource has been exhausted')) {
     return 'Gemini API rate limit or quota exceeded. Please verify your Google AI Studio quota.';
