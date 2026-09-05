@@ -199,4 +199,5 @@ docker run -p 8080:8080 \
   -e GEMINI_API_KEY=YOUR_GEMINI_API_KEY \
   medlens
 ```
-Visit `http://localhost:8080` in your browser.
+Visit `http://localhost:8080` in your browser.#   M e d i c a l  
+ 
