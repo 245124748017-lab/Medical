@@ -1,0 +1,40 @@
+# ==========================================
+# MedLens .dockerignore for Cloud Run
+# ==========================================
+
+# 1. Local dependencies
+**/node_modules
+node_modules
+
+# 2. Local environment secrets
+**/.env*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# 3. Local build artifacts
+**/dist
+**/build
+
+# 4. Uploaded reports and media
+**/uploads/*
+!**/uploads/.gitkeep
+*.pdf
+*.jpg
+*.jpeg
+*.png
+
+# 5. Git & IDE files
+.git
+.gitignore
+.vscode
+.idea
+*.md
+LICENSE
+
+# 6. Logs & Temp
+**/*.log
+**/.cache
+tmp/
+temp/
+scratch/
