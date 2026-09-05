@@ -8,12 +8,13 @@ export const getDashboardStats = async (req, res) => {
   try {
     const userId = req.user.uid;
 
-    const [totalPatients, totalReports, awaitingReview, verifiedReports, recentPatients, recentActivity] =
+    const [totalPatients, totalReports, awaitingReview, verifiedReports, totalLabResults, recentPatients, recentActivity] =
       await Promise.all([
         Patient.countDocuments({ userId }),
         MedicalReport.countDocuments({}),
         MedicalReport.countDocuments({ verificationStatus: 'PENDING' }),
         MedicalReport.countDocuments({ verificationStatus: 'VERIFIED' }),
+        LabResult.countDocuments({}),
         Patient.find({ userId })
           .sort({ updatedAt: -1 })
           .limit(5)
@@ -42,13 +43,17 @@ export const getDashboardStats = async (req, res) => {
       reportCount: reportCountMap[p._id.toString()] || 0,
     }));
 
+    const aiProcessedReports = Math.max(0, totalReports - awaitingReview);
+
     res.json({
       success: true,
       stats: {
         totalPatients,
         totalReports,
+        totalLabResults,
         awaitingReview,
         verifiedReports,
+        aiProcessedReports,
       },
       recentPatients: enrichedRecentPatients,
       recentActivity,

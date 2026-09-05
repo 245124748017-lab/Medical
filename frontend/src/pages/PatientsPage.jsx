@@ -83,11 +83,12 @@ export default function PatientsPage() {
 
       {/* Search and Filters Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-subtle flex items-center gap-3">
-        <Search className="w-4 h-4 text-slate-400 shrink-0" />
+        <Search className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search by patient name, symptoms, or medical conditions"
           placeholder="Search by patient name, symptoms, or medical conditions..."
           className="w-full text-sm bg-transparent outline-none placeholder-slate-400"
         />
@@ -149,13 +150,14 @@ export default function PatientsPage() {
                   <button
                     onClick={() => handleDelete(pt._id, pt.name)}
                     disabled={deletingId === pt._id}
-                    className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
-                    title="Delete Patient"
+                    aria-label={`Delete patient record for ${pt.name}`}
+                    className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                    title={`Delete Patient ${pt.name}`}
                   >
                     {deletingId === pt._id ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                      <Loader2 className="w-4 h-4 animate-spin text-rose-600" aria-hidden="true" />
                     ) : (
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
                     )}
                   </button>
                 </div>

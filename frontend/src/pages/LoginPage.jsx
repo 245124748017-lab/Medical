@@ -4,6 +4,8 @@ import { Stethoscope, Lock, Mail, ArrowRight, ShieldCheck, Sparkles } from 'luci
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
+import { formatAuthError } from '../utils/authErrors';
+
 export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
@@ -16,18 +18,27 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      addToast('Please enter both email and password.', 'error');
+      return;
+    }
+    if (isRegistering && password.length < 6) {
+      addToast('Password must be at least 6 characters long.', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       if (isRegistering) {
         await signupWithEmail(email, password);
-        addToast('Account registered successfully.', 'success');
+        addToast('Account registered successfully. Welcome to MedLens!', 'success');
       } else {
         await loginWithEmail(email, password);
         addToast('Welcome back to MedLens.', 'success');
       }
       navigate('/app/dashboard');
     } catch (err) {
-      addToast(err.message || 'Authentication failed. Please verify credentials.', 'error');
+      addToast(formatAuthError(err), 'error');
     } finally {
       setLoading(false);
     }
@@ -39,7 +50,7 @@ export default function LoginPage() {
       addToast('Authenticated with Google.', 'success');
       navigate('/app/dashboard');
     } catch (err) {
-      addToast(err.message || 'Google sign-in could not be completed.', 'error');
+      addToast(formatAuthError(err), 'error');
     }
   };
 

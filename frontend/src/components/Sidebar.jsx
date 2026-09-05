@@ -42,10 +42,10 @@ export default function Sidebar() {
           <div className="font-bold text-base text-white tracking-tight flex items-center gap-1.5">
             MedLens
             <span className="text-[10px] uppercase font-semibold tracking-wider bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded border border-teal-500/30">
-              AI CI
+              AI Organizer
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">Clinical Intelligence</p>
+          <p className="text-[11px] text-slate-400 font-medium">AI Clinical Record Organizer</p>
         </div>
       </div>
 

@@ -150,6 +150,26 @@ class LabResult extends BaseDocument {
     return new LabResult(fromDbRow(created));
   }
 
+  static async countDocuments(filter = {}) {
+    if (!isSupabaseConfigured()) {
+      if (filter.patientId) {
+        return demoLabResults.filter((l) => l.patientId === filter.patientId).length;
+      }
+      return demoLabResults.length;
+    }
+
+    let query = supabase.from(TABLE_NAME).select('*', { count: 'exact', head: true });
+    if (filter.patientId) {
+      query = query.eq('patient_id', filter.patientId);
+    }
+    if (filter.isRejected !== undefined) {
+      query = query.eq('is_rejected', filter.isRejected);
+    }
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
+  }
+
   static async deleteMany(filter = {}) {
     if (!isSupabaseConfigured()) {
       if (filter.reportId?.$in) {
