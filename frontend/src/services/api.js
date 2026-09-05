@@ -1,15 +1,24 @@
 import axios from 'axios';
 
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || !envUrl.trim()) {
+    return '/api';
+  }
+  const clean = envUrl.trim().replace(/\/+$/, '');
+  return clean.endsWith('/api') ? clean : `${clean}/api`;
+};
+
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Attach Bearer token from localStorage or session
+// Attach Bearer token from localStorage
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('medlens_auth_token') || 'demo-token-medlens';
+  const token = localStorage.getItem('medlens_auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

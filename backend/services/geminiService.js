@@ -149,6 +149,9 @@ export const extractReportWithGemini = async (filePath, mimeType, originalName) 
   }
 
   try {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Report document file not found at path: ${filePath}`);
+    }
     const resolvedMime = resolveMimeType(filePath, mimeType);
     const fileBuffer = fs.readFileSync(filePath);
     const base64Data = fileBuffer.toString('base64');
@@ -301,6 +304,9 @@ export const extractPatientDemographicsOnly = async (filePath, mimeType) => {
   }
 
   try {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Document file not found at path: ${filePath}`);
+    }
     const resolvedMime = resolveMimeType(filePath, mimeType);
     const fileBuffer = fs.readFileSync(filePath);
     const base64Data = fileBuffer.toString('base64');

@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import MedicalReport from '../models/MedicalReport.js';
 import Patient from '../models/Patient.js';
@@ -15,6 +16,15 @@ export const processReportInternal = async (reportId, userId) => {
 
   const patient = await Patient.findById(report.patientId);
   if (!patient) throw new Error('Patient not found');
+
+  // Verify file exists on server disk
+  if (!report.filePath || !fs.existsSync(report.filePath)) {
+    report.processingStatus = 'FAILED';
+    await report.save();
+    const missingErr = new Error('Report document file is not found on disk. It may have been cleared by ephemeral storage. Please re-upload the report.');
+    missingErr.code = 'FILE_NOT_FOUND';
+    throw missingErr;
+  }
 
   // Update status stepper
   report.processingStatus = 'ANALYZING';
@@ -243,6 +253,14 @@ export const uploadReportFile = async (req, res) => {
   } catch (error) {
     console.error('uploadReportFile Error:', error);
     res.status(500).json({ success: false, message: 'File upload encountered an internal error.' });
+  } finally {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (cleanupErr) {
+        console.warn('Ephemeral upload cleanup notice:', cleanupErr.message);
+      }
+    }
   }
 };
 
@@ -664,6 +682,14 @@ export const extractIntakePreview = async (req, res) => {
       code: 'AI_PROCESSING_UNAVAILABLE',
       message: 'AI extraction is temporarily unavailable. Please try again or review the uploaded report manually.',
     });
+  } finally {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (cleanupErr) {
+        console.warn('Temporary intake file cleanup notice:', cleanupErr.message);
+      }
+    }
   }
 };
 

@@ -9,7 +9,18 @@ try {
       credential: admin.credential.cert(serviceAccount),
     });
     firebaseInitialized = true;
-    console.log('Firebase Admin initialized with service account credentials.');
+    console.log('Firebase Admin initialized with service account JSON.');
+  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey,
+      }),
+    });
+    firebaseInitialized = true;
+    console.log(`Firebase Admin initialized with individual credentials for Project ID: ${process.env.FIREBASE_PROJECT_ID}`);
   } else if (process.env.FIREBASE_PROJECT_ID) {
     admin.initializeApp({
       projectId: process.env.FIREBASE_PROJECT_ID,

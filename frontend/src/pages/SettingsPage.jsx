@@ -93,18 +93,18 @@ export default function SettingsPage() {
         <div className="space-y-3 text-xs">
           <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
             <div className="flex items-center gap-2.5">
-              <span className={`w-2.5 h-2.5 rounded-full ${health?.status === 'online' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              <span className={`w-2.5 h-2.5 rounded-full ${health?.status === 'ok' || health?.status === 'online' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
               <span className="font-semibold text-slate-800">Node.js / Express REST API</span>
             </div>
-            <span className="font-bold text-emerald-700">{health?.status === 'online' ? 'Connected' : 'Offline'}</span>
+            <span className="font-bold text-emerald-700">{health?.status === 'ok' || health?.status === 'online' ? 'Connected' : 'Offline'}</span>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
             <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="font-semibold text-slate-800">Local MongoDB Service (Port 27017)</span>
+              <span className={`w-2.5 h-2.5 rounded-full ${health?.supabaseConfigured ? 'bg-emerald-500' : 'bg-sky-500'}`} />
+              <span className="font-semibold text-slate-800">Supabase PostgreSQL</span>
             </div>
-            <span className="font-bold text-emerald-700">Active</span>
+            <span className="font-bold text-slate-700">{health?.supabaseConfigured ? 'Production Connected' : 'Demo/Development Active'}</span>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
