@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, ShieldCheck, Sparkles, Server, Key, User, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Settings, ShieldCheck, Sparkles, Server, Key, User, CheckCircle2, AlertCircle, RefreshCw, Globe, Save, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { dashboardAPI } from '../services/api';
+import API, { dashboardAPI, getBaseURL } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
 
 export default function SettingsPage() {
   const { currentUser } = useAuth();
@@ -11,14 +10,22 @@ export default function SettingsPage() {
   const [health, setHealth] = useState(null);
   const [loadingHealth, setLoadingHealth] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [customApiUrl, setCustomApiUrl] = useState(
+    localStorage.getItem('medlens_custom_api_url') || ''
+  );
+  const isVercelMissingEnv =
+    typeof window !== 'undefined' &&
+    window.location.hostname.includes('vercel.app') &&
+    !import.meta.env.VITE_API_URL &&
+    !localStorage.getItem('medlens_custom_api_url');
 
   const checkHealth = async () => {
     try {
       setLoadingHealth(true);
-      const res = await axios.get('/api/health');
+      const res = await API.get('/health');
       setHealth(res.data);
     } catch (e) {
-      setHealth({ status: 'offline', message: 'Backend unreachable' });
+      setHealth({ status: 'offline', message: e.message || 'Backend unreachable' });
     } finally {
       setLoadingHealth(false);
     }
@@ -28,6 +35,19 @@ export default function SettingsPage() {
     checkHealth();
   }, []);
 
+  const handleSaveApiUrl = async (e) => {
+    e.preventDefault();
+    const cleanUrl = customApiUrl.trim().replace(/\/+$/, '');
+    if (cleanUrl) {
+      localStorage.setItem('medlens_custom_api_url', cleanUrl);
+      addToast(`Backend URL set to ${cleanUrl}. Reconnecting...`, 'info');
+    } else {
+      localStorage.removeItem('medlens_custom_api_url');
+      addToast('Reset to default API URL.', 'info');
+    }
+    await checkHealth();
+  };
+
   const handleSeedDemo = async () => {
     try {
       setSeeding(true);
@@ -36,7 +56,7 @@ export default function SettingsPage() {
         addToast('Hackathon demo dataset loaded successfully!', 'success');
       }
     } catch (e) {
-      addToast('Failed to seed demo data.', 'error');
+      addToast(e.message || 'Failed to seed demo data.', 'error');
     } finally {
       setSeeding(false);
     }
@@ -117,6 +137,56 @@ export default function SettingsPage() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Backend API URL Configuration */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-subtle space-y-4">
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Globe className="w-4 h-4 text-teal-600" />
+          <span>Render Backend API Endpoint</span>
+        </h3>
+
+        {isVercelMissingEnv && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-800 space-y-1">
+              <p className="font-semibold">Action Required for Vercel Deployment</p>
+              <p className="text-amber-700 leading-relaxed">
+                Your frontend is hosted on Vercel, but <code>VITE_API_URL</code> was not set at build time. Requests to <code>/api/*</code> are currently hitting Vercel static hosting and failing with <strong>405 Method Not Allowed</strong>.
+              </p>
+              <p className="text-amber-700 leading-relaxed">
+                Paste your Render backend URL below and click <strong>Save & Reconnect</strong> to connect immediately without waiting for a rebuild.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSaveApiUrl} className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">
+              Render Backend URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customApiUrl}
+                onChange={(e) => setCustomApiUrl(e.target.value)}
+                placeholder="https://your-backend.onrender.com"
+                className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-sm transition flex items-center gap-1.5 shrink-0"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Save & Connect</span>
+              </button>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Active Endpoint: <code className="text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded font-mono">{getBaseURL()}</code>
+          </p>
+        </form>
       </div>
 
       {/* Demo Dataset Controls */}

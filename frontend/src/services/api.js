@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
+export const getBaseURL = () => {
+  const localOverride = typeof window !== 'undefined' ? localStorage.getItem('medlens_custom_api_url') : null;
+  const envUrl = localOverride || import.meta.env.VITE_API_URL;
   if (!envUrl || !envUrl.trim()) {
     return '/api';
   }
@@ -16,8 +17,16 @@ const API = axios.create({
   },
 });
 
-// Attach Bearer token from localStorage
+// Attach Bearer token from localStorage & support runtime custom API URL
 API.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const customUrl = localStorage.getItem('medlens_custom_api_url');
+    if (customUrl && customUrl.trim()) {
+      const clean = customUrl.trim().replace(/\/+$/, '');
+      config.baseURL = clean.endsWith('/api') ? clean : `${clean}/api`;
+    }
+  }
+
   const token = localStorage.getItem('medlens_auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -28,6 +37,13 @@ API.interceptors.request.use((config) => {
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Detect Vercel 405 Method Not Allowed error (happens when VITE_API_URL is not set on Vercel)
+    if (error.response?.status === 405) {
+      const message =
+        'Backend connection error (405): Requests are hitting Vercel instead of your Render backend. Please configure VITE_API_URL in Vercel Environment Variables and redeploy, or set your Render URL in Settings.';
+      return Promise.reject(new Error(message));
+    }
+
     const message =
       error.response?.data?.message ||
       error.message ||
